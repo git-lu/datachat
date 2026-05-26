@@ -1,0 +1,89 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: data-chatbot-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+  # One-shot: download models into the shared Ollama volume (first run can take several minutes).
+  pull-models:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
+    volumes:
+      - ./scripts/pull-models.sh:/pull-models.sh:ro
+    entrypoint: ["/bin/sh", "/pull-models.sh"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  chatbot:
+    build: .
+    container_name: data-chatbot-app
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+      pull-models:
+        condition: service_completed_successfully
+    profiles:
+      - cli
+
+  # Interactive session: one container, many questions (stdin attached).
+  chat:
+    build: .
+    container_name: data-chatbot-chat
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+      pull-models:
+        condition: service_completed_successfully
+    stdin_open: true
+    tty: true
+    entrypoint: ["python", "-m", "app.main", "-i"]
+    profiles:
+      - chat
+
+  # Optional: Jupyter with the same app code mounted (notebook POC).
+  notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile.notebook
+    container_name: data-chatbot-notebook
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
+    volumes:
+      - .:/workspace
+    ports:
+      - "8888:8888"
+    depends_on:
+      ollama:
+        condition: service_healthy
+      pull-models:
+        condition: service_completed_successfully
+    profiles:
+      - notebook
+
+volumes:
+  ollama_data:
