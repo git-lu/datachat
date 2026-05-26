@@ -71,10 +71,19 @@ ask_iris_friendly("Which species has the largest petal length?", verbose=True)
 
 Copy `.env.example` to `.env` to override models:
 
-| Variable | Default |
-|----------|---------|
-| `AGENT_MODEL` | `granite3-dense:2b` |
-| `FORMATTER_MODEL` | `granite3-moe:1b` |
+| Variable | Default | Role |
+|----------|---------|------|
+| `AGENT_MODEL` | `llama3.1:8b` | NL → tool choice & args (needs reliable tool calling) |
+| `FORMATTER_MODEL` | `granite3-moe:1b` | Short friendly answer from tool evidence |
+
+`granite3-dense:2b` is too weak for tool calling in practice (often answers from memory with `agent_tool_calls=0`). Use a larger instruct model for the agent; keep the formatter small.
+
+**Pull the new agent model:**
+
+```bash
+ollama pull llama3.1:8b
+# or: docker compose up pull-models
+```
 
 ### Useful commands
 
@@ -99,12 +108,59 @@ docker compose down -v
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-ollama pull granite3-dense:2b
+ollama pull llama3.1:8b
 ollama pull granite3-moe:1b
 python -m app.main -i
 # or one question:
 python -m app.main "Which species has the largest average petal length?"
 ```
+
+## Agent tools (no embeddings)
+
+The full Iris table (150 rows) is embedded in the **agent system prompt** as CSV (`INCLUDE_DATASET_IN_PROMPT=true`) and available via pandas tools. Use tools for aggregates/filters; the CSV is ground truth for schema and raw rows.
+
+The agent must use tools—never embeddings—for facts:
+
+- **Bootstrap** (`BOOTSTRAP_DATAFRAME_INFO=true`, default): runs `dataframe_info` on the full dataset before the LLM turn.
+- **`export_full_dataset`**: returns all rows as CSV when the model needs the raw table.
+- **`count_rows`**: row counts for filter expressions (e.g. setosa with sepal_width &lt; 3.5).
+- **`filter_aggregate`**: filter first, then min/max/mean on a column (e.g. versicolor min sepal width).
+- **`value_counts`**: column distributions on the full table only—not for filtered “how many” questions.
+- **`REQUIRE_AGENT_TOOL_CALL=true`**: nudges the model once if it tries to answer without calling a tool itself.
+
+Aggregations (`groupby_aggregate`, filters) always run on the complete DataFrame; only displayed row previews are capped (`MAX_ROWS`).
+
+## Usage intent agent (separate POC)
+
+Predicts **proactive dashboards** from biologist usage logs (not Iris measurements).
+
+| Folder | Role |
+|--------|------|
+| `usage_poc/data/` | 2 users (Ana, Ben), events, widget catalog, playbook |
+| `usage_agent/` | RAG over session narratives → widget + question recommendations |
+
+Uses **`USAGE_AGENT_MODEL`** (default `granite3-dense:2b`). RAG is recency + keyword over session text—no embeddings at this scale.
+
+```bash
+pip install pyyaml   # if not already installed
+python -m usage_agent.main              # list users
+python -m usage_agent.main ana -v       # recommend for Dr. Ana Reyes
+python -m usage_agent.main ben --compare-playbook
+```
+
+See `usage_poc/README.md`. Merging with the Iris chatbot comes later.
+
+## Benchmark
+
+20 Iris Q&A cases with expected answers in `benchmarks/iris_cases.json`:
+
+```bash
+python scripts/run_benchmark.py --list    # print questions + expected answers
+python scripts/run_benchmark.py           # run all cases, open HTML report
+python scripts/run_benchmark.py --raw     # judge agent draft only (no formatter)
+```
+
+See `benchmarks/README.md` for the full case list and judging workflow.
 
 ## How it stays “warm”
 

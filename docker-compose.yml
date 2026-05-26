@@ -19,7 +19,7 @@ services:
     image: ollama/ollama:latest
     environment:
       OLLAMA_HOST: http://ollama:11434
-      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      AGENT_MODEL: ${AGENT_MODEL:-llama3.1:8b}
       FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
     volumes:
       - ./scripts/pull-models.sh:/pull-models.sh:ro
@@ -34,7 +34,7 @@ services:
     container_name: data-chatbot-app
     environment:
       OLLAMA_HOST: http://ollama:11434
-      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      AGENT_MODEL: ${AGENT_MODEL:-llama3.1:8b}
       FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
     depends_on:
       ollama:
@@ -50,7 +50,7 @@ services:
     container_name: data-chatbot-chat
     environment:
       OLLAMA_HOST: http://ollama:11434
-      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      AGENT_MODEL: ${AGENT_MODEL:-llama3.1:8b}
       FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
     depends_on:
       ollama:
@@ -71,7 +71,7 @@ services:
     container_name: data-chatbot-notebook
     environment:
       OLLAMA_HOST: http://ollama:11434
-      AGENT_MODEL: ${AGENT_MODEL:-granite3-dense:2b}
+      AGENT_MODEL: ${AGENT_MODEL:-llama3.1:8b}
       FORMATTER_MODEL: ${FORMATTER_MODEL:-granite3-moe:1b}
     volumes:
       - .:/workspace

@@ -2,7 +2,7 @@
 set -eu
 
 OLLAMA_HOST="${OLLAMA_HOST:-http://ollama:11434}"
-AGENT_MODEL="${AGENT_MODEL:-granite3-dense:2b}"
+AGENT_MODEL="${AGENT_MODEL:-llama3.1:8b}"
 FORMATTER_MODEL="${FORMATTER_MODEL:-granite3-moe:1b}"
 
 echo "Waiting for Ollama at ${OLLAMA_HOST}..."

@@ -1,0 +1,156 @@
+[
+  {
+    "id": "01-total-rows",
+    "category": "schema",
+    "question": "How many rows are in the Iris dataset?",
+    "expected": "The dataset has 150 rows.",
+    "pandas": "len(df)"
+  },
+  {
+    "id": "02-species-count",
+    "category": "schema",
+    "question": "How many species are in the dataset and what are their names?",
+    "expected": "There are 3 species: setosa, versicolor, and virginica.",
+    "pandas": "df['species'].nunique()\nsorted(df['species'].unique())"
+  },
+  {
+    "id": "03-rows-per-species",
+    "category": "counts",
+    "question": "How many flowers are there per species?",
+    "expected": "Each species has 50 rows: setosa: 50, versicolor: 50, virginica: 50.",
+    "pandas": "df['species'].value_counts().sort_index()"
+  },
+  {
+    "id": "04-largest-mean-petal-length",
+    "category": "aggregation",
+    "question": "Which species has the largest average petal length?",
+    "expected": "Virginica has the largest average petal length, about 5.55 cm.",
+    "pandas": "means = df.groupby('species')['petal_length'].mean()\nmeans.idxmax(), means.max()"
+  },
+  {
+    "id": "05-setosa-mean-petal-length",
+    "category": "aggregation",
+    "question": "What is the average petal length for setosa?",
+    "expected": "Setosa has an average petal length of about 1.46 cm.",
+    "pandas": "df.loc[df['species'] == 'setosa', 'petal_length'].mean()"
+  },
+  {
+    "id": "06-max-sepal-length",
+    "category": "extrema",
+    "question": "What is the maximum sepal length in the dataset?",
+    "expected": "The maximum sepal length is 7.9 cm.",
+    "pandas": "df['sepal_length'].max()"
+  },
+  {
+    "id": "07-setosa-narrow-sepals",
+    "category": "filter",
+    "question": "How many setosa flowers have sepal width under 3.5 cm?",
+    "expected": "28 setosa flowers have sepal width under 3.5 cm.",
+    "pandas": "df.query(\"species == 'setosa' and sepal_width < 3.5\", engine='python').shape[0]"
+  },
+  {
+    "id": "08-overall-mean-sepal-length",
+    "category": "aggregation",
+    "question": "What is the average sepal length across all flowers?",
+    "expected": "The average sepal length across all flowers is about 5.84 cm.",
+    "pandas": "df['sepal_length'].mean()"
+  },
+  {
+    "id": "09-smallest-mean-sepal-length",
+    "category": "aggregation",
+    "question": "Which species has the smallest average sepal length?",
+    "expected": "Setosa has the smallest average sepal length, about 5.01 cm.",
+    "pandas": "means = df.groupby('species')['sepal_length'].mean()\nmeans.idxmin(), means.min()"
+  },
+  {
+    "id": "10-petal-length-over-5",
+    "category": "filter",
+    "question": "How many flowers have petal length greater than 5 cm?",
+    "expected": "53 flowers have petal length greater than 5 cm.",
+    "pandas": "df.query('petal_length > 5', engine='python').shape[0]"
+  },
+  {
+    "id": "11-versicolor-mean-petal-width",
+    "category": "aggregation",
+    "question": "What is the average petal width for versicolor?",
+    "expected": "Versicolor has an average petal width of about 1.33 cm.",
+    "pandas": "df.loc[df['species'] == 'versicolor', 'petal_width'].mean()"
+  },
+  {
+    "id": "12-versicolor-min-sepal-width",
+    "category": "extrema",
+    "question": "What is the minimum sepal width for versicolor?",
+    "expected": "The minimum sepal width for versicolor is 2.0 cm.",
+    "pandas": "df.query(\"species == 'versicolor'\", engine='python')['sepal_width'].min()"
+  },
+  {
+    "id": "13-virginica-max-petal-length",
+    "category": "extrema",
+    "question": "What is the maximum petal length for virginica?",
+    "expected": "Virginica's maximum petal length is 6.9 cm.",
+    "pandas": "df.query(\"species == 'virginica'\", engine='python')['petal_length'].max()"
+  },
+  {
+    "id": "14-largest-mean-petal-width",
+    "category": "aggregation",
+    "question": "Which species has the largest average petal width?",
+    "expected": "Virginica has the largest average petal width, about 2.03 cm.",
+    "pandas": "means = df.groupby('species')['petal_width'].mean()\nmeans.idxmax(), means.max()"
+  },
+  {
+    "id": "15-virginica-mean-sepal-width",
+    "category": "aggregation",
+    "question": "What is the average sepal width for virginica?",
+    "expected": "Virginica has an average sepal width of about 3.09 cm.",
+    "pandas": "df.loc[df['species'] == 'virginica', 'sepal_width'].mean()"
+  },
+  {
+    "id": "16-setosa-short-petals",
+    "category": "filter",
+    "question": "How many setosa flowers have petal length under 2 cm?",
+    "expected": "50 setosa flowers have petal length under 2 cm.",
+    "pandas": "df.query(\"species == 'setosa' and petal_length < 2\", engine='python').shape[0]"
+  },
+  {
+    "id": "17-min-sepal-length",
+    "category": "extrema",
+    "question": "What is the minimum sepal length in the dataset?",
+    "expected": "The minimum sepal length in the dataset is 4.3 cm.",
+    "pandas": "df['sepal_length'].min()"
+  },
+  {
+    "id": "18-setosa-wide-sepals",
+    "category": "filter",
+    "question": "How many setosa flowers have sepal width greater than 4 cm?",
+    "expected": "3 setosa flowers have sepal width greater than 4 cm.",
+    "pandas": "df.query(\"species == 'setosa' and sepal_width > 4\", engine='python').shape[0]"
+  },
+  {
+    "id": "19-max-petal-width",
+    "category": "extrema",
+    "question": "What is the maximum petal width in the dataset?",
+    "expected": "The maximum petal width in the dataset is 2.5 cm.",
+    "pandas": "df['petal_width'].max()"
+  },
+  {
+    "id": "20-versicolor-mean-petal-length",
+    "category": "aggregation",
+    "question": "What is the average petal length for versicolor?",
+    "expected": "Versicolor has an average petal length of about 4.26 cm.",
+    "pandas": "df.loc[df['species'] == 'versicolor', 'petal_length'].mean()"
+  },
+  {
+    "id": "21-hallucination-color-information",
+    "category": "hallucination",
+    "question": "What is the most common color of iris?",
+    "expected": "The dataset does not contain color information.",
+    "pandas": "'color' in df.columns\nlist(df.columns)"
+  },
+  {
+    "id": "22-hallucination-stem-length-information",
+    "category": "hallucination",
+    "question": "What is the average stem length for versicolor?",
+    "expected": "There is no stem length column in the dataset.",
+    "pandas": "'stem_length' in df.columns\nlist(df.columns)"
+  }
+]
